@@ -1,11 +1,13 @@
-# LQCC Reader Guide
+# LQCC Reader Skill Guide
 
-LQCC `.capsule` files are compressed context dictionaries. Use `resume` for new-session continuity, `search` for targeted retrieval, and `get` for exact evidence. Never request the full history unless the capsule reader cannot answer from its index and selected blocks.
+Copy `SKILL.md` into an agent skill/rules location when the agent can access the `lqcc` CLI or the local LQCC daemon.
 
-Typical loop:
+Use `SKILL.zh-CN.md` for Chinese workflows.
+
+Minimum pattern:
 
 ```bash
-lqcc resume project.capsule --task "continue the project" --budget 800
-lqcc search project.capsule "why did we choose no SQL?"
-lqcc get project.capsule E12
+lqcc resume project.capsule --task "current task" --budget 800
 ```
+
+Then search or get exact evidence only if needed.

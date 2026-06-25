@@ -1,29 +1,30 @@
-# LQCC
+# LQCC 0.7.1
 
-**Lightweight Queryable Context Compression** for long-running AI conversations.
+**Lightweight Queryable Context Compression** is a local-first `.capsule` context dictionary for long-running AI conversations.
 
-LQCC stores a long conversation in a local `.capsule` file, turns it into a queryable context dictionary, and generates a small task-specific resume packet for the next AI chat.
+LQCC saves the full visible history locally, extracts a searchable context dictionary, and gives the next AI session only the small context packet it needs.
 
-It keeps the full visible history locally and only sends the model the context needed for the current task.
+## What works in 0.7.1
 
-## What works now
-
-- Single-file `.capsule` format, no SQLite runtime backend.
-- Local Python CLI.
-- Import JSONL, JSON, Markdown, or loose plain-text chat transcripts.
-- Append new turns as a project continues.
-- Extract context dictionary entries: `DECISION`, `REQUIREMENT`, `TASK`, `PREFERENCE`, `WARNING`, `FACT`, `TRACE`, `ARTIFACT`.
-- Search the capsule without loading the full history into an AI model.
-- Generate token-budgeted resume packets for a new chat.
-- Attach files such as PDFs, images, text files, and binaries.
-- Export the full history back to Markdown or JSONL.
-- Verify capsule integrity.
-
-LQCC runs locally. No API key is required.
+- no-SQL packed `.capsule` file format
+- Python CLI for Linux, Windows, and macOS
+- one-command beginner flow: `lqcc quick chat.md`
+- interactive terminal menu: `lqcc` or `lqcc menu`
+- local HTTP daemon for automatic appends and retrieval
+- OpenAI-compatible non-streaming proxy that records requests and replies
+- command wrapper that records command output as tool context
+- search and resume from the capsule without loading full history
+- PDF, image, text, code, and binary attachments with AI-readable sidecars
+- full-history export and capsule verification
+- reader skill for Codex, Claude Code, Cursor, and other agents
 
 ## Install
 
+<<<<<<< HEAD
 Test install via TestPyPI: 
+=======
+From TestPyPI:
+>>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple lqcc
@@ -32,164 +33,135 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 From source:
 
 ```bash
-python -m pip install -e .
+git clone https://github.com/zjnbwxq/lqcc.git
+cd lqcc
+python -m pip install -e ".[multimodal]"
 ```
 
-Optional extras:
+Check:
 
 ```bash
-python -m pip install -e '.[multimodal]'
+lqcc --version
 ```
 
-The base CLI uses the Python standard library. Optional extras improve compression and file sidecars.
+Expected:
 
-## Quick start
-
-Create a capsule:
-
-```bash
-lqcc create project.capsule --title "My project"
+```text
+lqcc 0.7.1
 ```
 
-Or build one directly from a transcript:
+## Fastest use
 
 ```bash
-lqcc build chat.md -o project.capsule --title "My project"
+lqcc quick examples/demo_chat.md
 ```
 
-Append turns:
+This creates `examples/demo_chat.capsule` and prints a small packet you can paste into a new AI chat.
+
+## Normal manual flow
 
 ```bash
-lqcc append project.capsule --role user --text "The project is called LQCC."
-lqcc append project.capsule --role assistant --text "LQCC stores context in a local .capsule file."
-```
-
-Import an existing transcript:
-
-```bash
-lqcc import-chat project.capsule chat.md
-```
-
-Search the context dictionary:
-
-```bash
-lqcc search project.capsule "What did we decide about the file format?"
-```
-
-Generate a small packet for a fresh AI chat:
-
-```bash
-lqcc resume project.capsule \
-  --task "Continue implementing the CLI" \
-  --budget 800
-```
-
-Attach files:
-
-```bash
-lqcc attach project.capsule paper.pdf
-lqcc attach project.capsule screenshot.png
-```
-
-Export the full archive:
-
-```bash
-lqcc export project.capsule full-history.md
-```
-
-Verify integrity:
-
-```bash
+lqcc build chat.md -o project.capsule --title "My Project"
+lqcc search project.capsule "what did we decide?"
+lqcc resume project.capsule --task "continue the project" --budget 800
 lqcc verify project.capsule
 ```
 
-## Input formats
-
-### JSONL
-
-```jsonl
-{"role":"user","content":"We need a queryable context dictionary."}
-{"role":"assistant","content":"The raw conversation remains lossless."}
-```
+## Interactive menu
 
 ```bash
-lqcc import-jsonl project.capsule chat.jsonl
+lqcc
 ```
 
-### JSON
-
-A list of messages or an object with `messages`:
-
-```json
-[
-  {"role": "user", "content": "The project is called LQCC."},
-  {"role": "assistant", "content": "Got it."}
-]
-```
+or:
 
 ```bash
-lqcc import-chat project.capsule chat.json --format json
+lqcc menu
 ```
 
-### Markdown / plain text
+The menu lets users build, resume, search, append, attach, verify, start a daemon, or start a proxy without remembering command syntax.
+
+## Local daemon
+
+Use the daemon when another tool or agent should write into and read from a capsule automatically.
+
+```bash
+lqcc daemon project.capsule --port 8765
+```
+
+Endpoints:
 
 ```text
-User: The project is called LQCC.
-Assistant: LQCC saves context in a .capsule file.
+GET  /health
+GET  /stats
+POST /append
+POST /append-many
+POST /resume
+POST /search
+POST /get
+POST /attach
 ```
+
+Example:
 
 ```bash
-lqcc import-chat project.capsule chat.md
+curl -X POST http://127.0.0.1:8765/append \
+  -H "Content-Type: application/json" \
+  -d '{"role":"user","content":"Decision: keep active context small."}'
 ```
 
-If a text file has no role markers, it is imported as one turn using `--default-role user` by default.
+## OpenAI-compatible proxy
 
-## Core commands
+Use the proxy when an API client should send messages through LQCC so visible messages are automatically written to the capsule.
+
+```bash
+export OPENAI_API_KEY="your-key"
+lqcc proxy project.capsule \
+  --upstream https://api.openai.com/v1/chat/completions \
+  --context-mode auto \
+  --port 8765
+```
+
+Then point the client to:
 
 ```text
-lqcc build               create a .capsule from a chat transcript
-lqcc create              create an empty .capsule
-lqcc append              append one visible turn
-lqcc import-jsonl        import JSONL role/content messages
-lqcc import-chat         import JSON, JSONL, Markdown, or plain text
-lqcc search              search dictionary entries, attachments, and source turns
-lqcc resume              build a small restart packet for a new AI session
-lqcc attach              attach a file with payload and sidecar metadata
-lqcc get                 retrieve E#, T#, or A# metadata/evidence
-lqcc extract-attachment  restore attachment bytes by A#
-lqcc add-entry           add/correct an authoritative dictionary entry
-lqcc new-session         branch into a fresh conversation inside the capsule
-lqcc export              export the lossless archive
-lqcc inspect             show storage and token statistics
-lqcc compact             repack the capsule and remove stale tail indexes
-lqcc verify              verify index, raw blocks, attachments, and hashes
+http://127.0.0.1:8765/v1/chat/completions
 ```
 
-## Platform support
+Context modes:
 
-The Python CLI runs on:
+```text
+pass    record messages, forward original request
+resume  forward a capsule resume packet plus recent messages
+auto    use pass until the request becomes large, then use resume
+```
 
-- Linux
-- macOS Intel
-- macOS Apple Silicon
-- Windows
+Current limitation: streaming proxy responses are not supported in 0.7.1. Use non-streaming requests.
 
-The `.capsule` file is platform-independent.
+## Command wrapper
 
-## Current limits
+Use `wrap` to record command output as tool context:
 
-- Browser integration is not included in the first release.
-- Hidden model chain-of-thought is not captured. LQCC stores visible conversation and public work traces only.
-- The current dictionary extraction is deterministic and conservative. It is useful, but not final.
-- Multimodal support currently stores original files and lightweight sidecars; deeper image/audio understanding is future work.
+```bash
+lqcc wrap project.capsule -- python -m pytest
+```
 
-## Documentation
+This records the command start, exit code, stdout, and stderr into the capsule.
 
-- [CLI guide](docs/CLI.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Capsule format](docs/FORMAT.md)
-- [Roadmap](ROADMAP.md)
-- [Chinese README](README.zh-CN.md)
+## Agent reader skill
+
+See:
+
+```text
+reader-skill/SKILL.md
+reader-skill/SKILL.zh-CN.md
+```
+
+The skill tells an agent to use `lqcc resume` first, then `lqcc search` or `lqcc get` only when more evidence is needed.
+
+## Scope
+
+LQCC 0.7.1 handles visible text and file artifacts. It does not capture hidden chain-of-thought. It does not include a browser extension yet. Browser support, desktop UI, stronger multimodal indexing, and stable v1.0 format guarantees are future work.
 
 ## License
 

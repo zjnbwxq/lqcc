@@ -1,46 +1,46 @@
-# LQCC Capsule Reader Skill
+# LQCC Reader Skill 0.7.1
 
-Use this skill when the user provides a `.capsule` file or says that project context is stored in LQCC.
+Use this skill when a project provides an LQCC `.capsule` file or a local LQCC daemon.
 
 ## Goal
 
-Retrieve only the context needed for the current task. Do not ask the user to paste the full conversation history.
+Keep active context small. Do not ask the user to paste the full conversation history first.
 
-## Procedure
+## Preferred retrieval order
 
-1. Start with a resume packet:
+1. Use `lqcc resume <capsule> --task "<current task>" --budget 800`.
+2. If more information is needed, use `lqcc search <capsule> "<query>"`.
+3. If exact evidence is needed, use `lqcc get <capsule> E#`, `T#`, or `A#`.
+4. Only request full export when the capsule context is insufficient.
 
-```bash
-lqcc resume <capsule> --task "<current task>" --budget 800
-```
+## Writing back
 
-2. Use the returned packet as the active context for the current answer.
-
-3. If a specific decision, file, or evidence item is missing, search the capsule:
-
-```bash
-lqcc search <capsule> "<question>" --limit 8
-```
-
-4. If exact evidence is needed, retrieve a cited record:
+When local tools are available, write meaningful visible updates back to the capsule:
 
 ```bash
-lqcc get <capsule> E12
-lqcc get <capsule> T40
-lqcc get <capsule> A3
+lqcc append project.capsule --role assistant --text "Decision: ..."
 ```
 
-5. After useful new visible context is produced, append the new turns:
+If the daemon is running, use:
 
-```bash
-lqcc append <capsule> --role user --text "..."
-lqcc append <capsule> --role assistant --text "..."
+```text
+POST /append
+POST /append-many
 ```
 
-## Rules
+Do not save hidden chain-of-thought. Save only visible decisions, requirements, tasks, warnings, artifacts, and final work traces.
 
-- Prefer `resume` before `search`.
-- Prefer dictionary entries before raw turns.
-- Load raw turns only when exact evidence is needed.
-- Keep active context under the requested budget.
-- Never treat LQCC as a normal summarizer; it is a queryable context dictionary.
+## Local daemon
+
+If the user says a daemon is running, prefer HTTP endpoints:
+
+```text
+POST /resume
+POST /search
+POST /get
+POST /append
+```
+
+## Principle
+
+Retrieve only what is needed for the current task.

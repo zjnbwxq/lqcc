@@ -1,84 +1,69 @@
-# `.capsule` Format v0.7
+# `.capsule` Format 0.7.1
 
-The `.capsule` file is a single packed file.
-
-## Goals
-
-```text
-local-first
-single-file
-appendable
-queryable
-recoverable
-cross-platform
-```
+LQCC 0.7.1 uses a no-SQL packed capsule format.
 
 ## High-level layout
 
 ```text
-MAGIC
-SECTION*
-TAIL_INDEX
-FOOTER
+MAGIC header
+section: compressed raw block
+section: attachment payload
+section: attachment payload
+...
+compressed tail index
+footer
 ```
 
-## Sections
+The footer stores the offset and hash of the current tail index.
 
-Each section has:
+## Raw blocks
+
+Conversation turns are grouped into compressed raw blocks. A block contains visible role/content turns.
+
+The index stores:
 
 ```text
-section magic
-kind
-id
-metadata length
-payload length
-metadata JSON
-compressed payload
+turn id
+session id
+role
+sequence number
+hash
+query sketch
+block id
 ```
 
-Current section kinds:
+Raw block payloads are decoded only when exact turn text is needed.
+
+## Dictionary entries
+
+LQCC extracts structured entries from visible text:
 
 ```text
-B  raw block
-A  attachment
+FACT
+DECISION
+REQUIREMENT
+TASK
+PREFERENCE
+WARNING
+TRACE
+ARTIFACT
 ```
 
-## Tail index
+Entries are used for search and resume packets.
 
-The tail index is compressed JSON in v0.7. It contains:
+## Attachments
+
+Attachments are stored as compressed payloads. Each attachment also gets an AI-readable sidecar.
+
+Examples:
 
 ```text
-metadata
-sessions
-turn records
-raw block table
-dictionary entries
-entry-source links
-attachment records
-counters
+PDF: page count and first extracted text
+image: width, height, mode, format
+text/code: extracted text preview
+binary: basic file metadata
 ```
 
-The footer stores the tail index offset, length, and hash.
+## Stability
 
-## Integrity
-
-LQCC verifies:
-
-```text
-tail index hash
-raw block hashes
-turn content hashes
-attachment hashes
-```
-
-Run:
-
-```bash
-lqcc verify project.capsule
-```
-
-## Compatibility
-
-Format v0.7 is still alpha. The CLI reads format version `0.7`.
-
-Future versions should provide migration commands before the format is declared stable.
+0.7.1 is an alpha format. The stable compatibility promise starts at 1.0.

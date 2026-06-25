@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-rm -f demo.capsule
-lqcc build examples/demo_chat.md -o demo.capsule --title "LQCC demo" --force
-lqcc attach demo.capsule examples/notes.md
-lqcc search demo.capsule "Why is LQCC not a normal summarizer?"
-lqcc resume demo.capsule --task "Continue the LQCC project" --budget 600
+# Build a capsule and print a resume packet.
+lqcc quick examples/demo_chat.md --force --budget 600
+
+# Search it.
+lqcc search examples/demo_chat.capsule "what is LQCC?"
+
+# Verify it.
+lqcc verify examples/demo_chat.capsule
+
+# Optional automation:
+# lqcc daemon examples/demo_chat.capsule --port 8765
+# lqcc proxy examples/demo_chat.capsule --context-mode auto --port 8765

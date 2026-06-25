@@ -1,28 +1,26 @@
-# LQCC
+# LQCC 0.7.1
 
-**Lightweight Queryable Context Compression**，面向长期 AI 对话的轻量级可查询上下文压缩。
+**Lightweight Queryable Context Compression** 是一个本地优先的 `.capsule` 上下文字典，用来解决长期 AI 对话的上下文膨胀问题。
 
-LQCC 把长对话保存在本地 `.capsule` 文件里，整理成一本可检索的上下文字典，然后为下一次 AI 对话生成一个很小的任务恢复包。
+LQCC 会把完整可见历史保存在本地，从中抽取可检索的上下文字典，并在下一次 AI 对话时只输出当前任务需要的小型恢复包。
 
-完整可见历史仍然本地保存；模型只拿当前任务需要的那一小部分上下文。
+## 0.7.1 已完成
 
-## 现在已经能做什么
-
-- 单文件 `.capsule` 格式，运行时不依赖 SQLite。
-- 本地 Python CLI。
-- 导入 JSONL、JSON、Markdown、普通文本聊天记录。
-- 持续追加新的对话轮次。
-- 自动抽取上下文字典词条：`DECISION`、`REQUIREMENT`、`TASK`、`PREFERENCE`、`WARNING`、`FACT`、`TRACE`、`ARTIFACT`。
-- 在 capsule 里搜索历史决定、任务、偏好和证据。
-- 按 token 预算生成新对话恢复包。
-- 添加 PDF、图片、文本、二进制文件等附件。
-- 导出完整历史为 Markdown 或 JSONL。
-- 校验 capsule 完整性。
-
-LQCC 本地运行，不需要 API key。
+- no-SQL packed `.capsule` 单文件格式
+- Linux、Windows、macOS 都能用的 Python CLI
+- 一键入门命令：`lqcc quick chat.md`
+- 终端菜单：`lqcc` 或 `lqcc menu`
+- 本地 HTTP daemon，用于自动写入和检索
+- OpenAI-compatible 非流式 proxy，用于自动记录请求和回复
+- 命令 wrapper，可以把命令输出写成 tool context
+- 不读取完整历史即可 search / resume
+- PDF、图片、文本、代码、二进制附件 sidecar
+- 完整历史导出和 capsule 校验
+- 给 Codex、Claude Code、Cursor 等 agent 使用的 reader skill
 
 ## 安装
 
+<<<<<<< HEAD
 测试版安装（TestPyPI）：
 
 ```bash
@@ -30,165 +28,146 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 ```
 
 源码安装：
+=======
+从 TestPyPI 安装：
+>>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)
 
 ```bash
-python -m pip install -e .
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple lqcc
 ```
 
-可选多模态依赖：
+从源码安装：
 
 ```bash
-python -m pip install -e '.[multimodal]'
+git clone https://github.com/zjnbwxq/lqcc.git
+cd lqcc
+python -m pip install -e ".[multimodal]"
 ```
 
-基础 CLI 只依赖 Python 标准库。可选依赖用于更好的压缩和文件 sidecar。
-
-## 快速开始
-
-创建 capsule：
+检查：
 
 ```bash
-lqcc create project.capsule --title "My project"
+lqcc --version
 ```
 
-也可以从聊天记录直接生成：
+应该看到：
 
-```bash
-lqcc build chat.md -o project.capsule --title "My project"
+```text
+lqcc 0.7.1
 ```
 
-追加对话：
+## 最快使用方式
 
 ```bash
-lqcc append project.capsule --role user --text "项目叫 LQCC。"
-lqcc append project.capsule --role assistant --text "LQCC 把上下文保存在本地 .capsule 文件里。"
+lqcc quick examples/demo_chat.md
 ```
 
-导入已有聊天记录：
+它会创建 `examples/demo_chat.capsule`，并直接打印一个可以复制到新 AI 对话里的小型恢复包。
+
+## 普通手动流程
 
 ```bash
-lqcc import-chat project.capsule chat.md
-```
-
-搜索上下文字典：
-
-```bash
-lqcc search project.capsule "我们为什么不用 SQL？"
-```
-
-生成新对话恢复包：
-
-```bash
-lqcc resume project.capsule \
-  --task "继续实现 Python CLI" \
-  --budget 800
-```
-
-添加附件：
-
-```bash
-lqcc attach project.capsule paper.pdf
-lqcc attach project.capsule screenshot.png
-```
-
-导出完整历史：
-
-```bash
-lqcc export project.capsule full-history.md
-```
-
-校验文件：
-
-```bash
+lqcc build chat.md -o project.capsule --title "My Project"
+lqcc search project.capsule "我们决定了什么？"
+lqcc resume project.capsule --task "继续这个项目" --budget 800
 lqcc verify project.capsule
 ```
 
-## 输入格式
-
-### JSONL
-
-```jsonl
-{"role":"user","content":"我们需要一本可查询的上下文字典。"}
-{"role":"assistant","content":"完整原文仍然无损保存。"}
-```
+## 终端菜单
 
 ```bash
-lqcc import-jsonl project.capsule chat.jsonl
+lqcc
 ```
 
-### JSON
-
-支持消息列表，或包含 `messages` 字段的对象：
-
-```json
-[
-  {"role": "user", "content": "项目叫 LQCC。"},
-  {"role": "assistant", "content": "已记录。"}
-]
-```
+或者：
 
 ```bash
-lqcc import-chat project.capsule chat.json --format json
+lqcc menu
 ```
 
-### Markdown / 普通文本
+菜单可以完成 build、resume、search、append、attach、verify、启动 daemon、启动 proxy。
+
+## 本地 daemon
+
+当其他工具或 agent 需要自动写入和读取 capsule 时，用 daemon：
+
+```bash
+lqcc daemon project.capsule --port 8765
+```
+
+接口：
 
 ```text
-User: 项目叫 LQCC。
-Assistant: LQCC 把上下文保存在 .capsule 文件里。
+GET  /health
+GET  /stats
+POST /append
+POST /append-many
+POST /resume
+POST /search
+POST /get
+POST /attach
 ```
+
+示例：
 
 ```bash
-lqcc import-chat project.capsule chat.md
+curl -X POST http://127.0.0.1:8765/append \
+  -H "Content-Type: application/json" \
+  -d '{"role":"user","content":"Decision: keep active context small."}'
 ```
 
-如果文本没有角色标记，默认会作为一个 `user` turn 导入，也可以用 `--default-role` 修改。
+## OpenAI-compatible proxy
 
-## 核心命令
+当 API 客户端希望通过 LQCC 自动记录消息时，用 proxy：
+
+```bash
+export OPENAI_API_KEY="your-key"
+lqcc proxy project.capsule \
+  --upstream https://api.openai.com/v1/chat/completions \
+  --context-mode auto \
+  --port 8765
+```
+
+然后把客户端的 endpoint 指向：
 
 ```text
-lqcc build               从聊天记录直接创建 .capsule
-lqcc create              创建空的 .capsule
-lqcc append              追加一轮可见对话
-lqcc import-jsonl        导入 JSONL 消息
-lqcc import-chat         导入 JSON、JSONL、Markdown 或普通文本
-lqcc search              搜索词条、附件和原文证据
-lqcc resume              为新 AI 对话生成小型恢复包
-lqcc attach              添加文件附件和 sidecar 信息
-lqcc get                 读取 E#、T#、A# 元数据/证据
-lqcc extract-attachment  按 A# 恢复附件原始字节
-lqcc add-entry           手动添加或修正权威词条
-lqcc new-session         在同一个 capsule 中开启新会话分支
-lqcc export              导出完整历史
-lqcc inspect             查看存储和 token 统计
-lqcc compact             重新打包并清理旧尾部索引
-lqcc verify              校验索引、原文块、附件和 hash
+http://127.0.0.1:8765/v1/chat/completions
 ```
 
-## 平台支持
+上下文模式：
 
-Python CLI 支持：
+```text
+pass    只记录消息，原样转发请求
+resume  用 capsule 恢复包 + 最近消息转发
+auto    请求较小时 pass，请求变大后自动 resume
+```
 
-- Linux
-- macOS Intel
-- macOS Apple Silicon
-- Windows
+当前限制：0.7.1 暂不支持流式 proxy 响应。请使用非流式请求。
 
-`.capsule` 文件本身跨平台。
+## 命令 wrapper
 
-## 当前限制
+用 `wrap` 把命令输出记录为 tool context：
 
-- 暂时不做浏览器插件。
-- 不捕获隐藏 chain-of-thought，只保存可见对话和公开工作痕迹。
-- 当前字典抽取是本地确定性规则，够用但不是最终版本。
-- 多模态目前是原始文件保存 + 轻量 sidecar，更深入的图片/音频理解放在后续版本。
+```bash
+lqcc wrap project.capsule -- python -m pytest
+```
 
-## 文档
+它会记录命令开始、退出码、stdout、stderr。
 
-- [CLI guide](docs/CLI.md)
-- [Architecture](docs/ARCHITECTURE.md)
-- [Capsule format](docs/FORMAT.md)
-- [Roadmap](ROADMAP.md)
+## Agent reader skill
+
+见：
+
+```text
+reader-skill/SKILL.md
+reader-skill/SKILL.zh-CN.md
+```
+
+这个 skill 会告诉 agent：先用 `lqcc resume`，不够再用 `lqcc search` 或 `lqcc get`，不要让用户粘贴完整历史。
+
+## 范围
+
+LQCC 0.7.1 处理可见文本和文件产物。它不会保存隐藏 chain-of-thought。它还没有浏览器插件。浏览器支持、桌面 UI、更强多模态索引、稳定 v1.0 格式保证是后续路线图。
 
 ## License
 

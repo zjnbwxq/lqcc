@@ -1,86 +1,85 @@
-# Architecture
+# LQCC Architecture 0.7.1
 
-LQCC has three layers.
+LQCC is built around three components.
 
-## 1. Lossless local archive
+## 1. `.capsule` file
 
-Every visible turn is stored in compressed raw blocks inside the `.capsule` file.
+A single local packed file.
 
-This layer is not sent to the AI by default. It exists so the user does not lose context.
+It stores:
 
-## 2. Context dictionary
+- compressed raw conversation blocks
+- extracted dictionary entries
+- attachment payloads
+- attachment sidecars
+- query sketches
+- compressed tail index
 
-LQCC extracts a small set of typed records from the visible conversation:
+The file is no-SQL. Readers open the file, jump to the tail index, search the dictionary, and decode raw blocks only when needed.
 
-```text
-DECISION
-REQUIREMENT
-TASK
-PREFERENCE
-WARNING
-FACT
-TRACE
-ARTIFACT
-```
+## 2. CLI and local services
 
-These entries form the active context dictionary. They are sparse on purpose. The archive remains available when exact evidence is needed.
+The CLI exposes both manual and automated flows.
 
-## 3. Budgeted retrieval
-
-When the user starts a new AI session, LQCC builds a resume packet:
+Manual:
 
 ```text
-current task
-+ most relevant dictionary entries
-+ optional recent turns
-+ limited evidence snippets
+quick
+build
+search
+resume
+append
+attach
+export
+verify
 ```
 
-The packet is kept under a token budget.
-
-## Runtime flow
+Automation:
 
 ```text
-append/import
-    -> normalize visible turn
-    -> store raw content in compressed block
-    -> extract dictionary records
-    -> update tail index
-
-search/resume
-    -> load tail index
-    -> score dictionary records and source turns
-    -> locally decode only needed raw blocks
-    -> return a small result packet
+daemon
+proxy
+wrap
+start
 ```
 
-## No-SQL packed format
+The daemon provides a local HTTP API. The proxy provides an OpenAI-compatible non-streaming capture layer.
 
-v0.7 does not use SQLite as the runtime capsule format.
+## 3. Reader skill
 
-The file is a packed appendable container:
+The reader skill is a short instruction file for AI agents.
+
+It tells the agent:
+
+- do not ask for full history first
+- call `lqcc resume` for minimal context
+- call `lqcc search` when more information is needed
+- call `lqcc get` when exact evidence is needed
+- keep active context small
+
+## Data flow
+
+Manual flow:
 
 ```text
-magic header
-section: raw block
-section: attachment
-...
-compressed tail index
-footer
+chat export -> lqcc quick/build -> .capsule -> lqcc resume -> next AI chat
 ```
 
-The reader opens the file, jumps to the footer, loads the compressed tail index, and only decodes raw blocks when needed.
-
-## Local-first principle
-
-The base product does not require:
+Daemon flow:
 
 ```text
-API key
-cloud upload
-account login
-browser extension
-local database server
+client/tool -> local daemon -> .capsule
+                         -> search/resume/get
 ```
 
-Optional future integrations may use local models or external APIs, but the core must remain usable offline.
+Proxy flow:
+
+```text
+API client -> LQCC proxy -> upstream model API
+                   ↓
+              .capsule
+```
+
+## Design principle
+
+Keep raw history complete, but keep active model context small.

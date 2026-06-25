@@ -1,46 +1,46 @@
-# LQCC 胶囊读取 Skill
+# LQCC Reader Skill 0.7.1
 
-当用户提供 `.capsule` 文件，或者说项目上下文存放在 LQCC 中时，使用这个 skill。
+当项目提供 LQCC `.capsule` 文件或本地 LQCC daemon 时，使用这个 skill。
 
 ## 目标
 
-只读取当前任务需要的上下文。不要要求用户粘贴完整聊天历史。
+保持活跃上下文很小。不要一开始就要求用户粘贴完整聊天历史。
 
-## 步骤
+## 推荐读取顺序
 
-1. 先生成恢复包：
+1. 先用 `lqcc resume <capsule> --task "<当前任务>" --budget 800`。
+2. 如果信息不够，再用 `lqcc search <capsule> "<查询>"`。
+3. 如果需要精确证据，再用 `lqcc get <capsule> E#`、`T#` 或 `A#`。
+4. 只有 capsule 信息不够时，才要求完整导出。
 
-```bash
-lqcc resume <capsule> --task "<当前任务>" --budget 800
-```
+## 写回 capsule
 
-2. 把返回内容作为当前回答的工作上下文。
-
-3. 如果缺少某个具体决定、文件或证据，再搜索：
-
-```bash
-lqcc search <capsule> "<问题>" --limit 8
-```
-
-4. 如果需要精确证据，读取指定记录：
+如果本地工具可用，把重要的可见更新写回 capsule：
 
 ```bash
-lqcc get <capsule> E12
-lqcc get <capsule> T40
-lqcc get <capsule> A3
+lqcc append project.capsule --role assistant --text "Decision: ..."
 ```
 
-5. 产生新的有用可见上下文后，追加写入：
+如果 daemon 正在运行，使用：
 
-```bash
-lqcc append <capsule> --role user --text "..."
-lqcc append <capsule> --role assistant --text "..."
+```text
+POST /append
+POST /append-many
 ```
 
-## 规则
+不要保存隐藏 chain-of-thought。只保存可见的决定、要求、任务、警告、产物和最终工作痕迹。
 
-- 先用 `resume`，再考虑 `search`。
-- 优先使用字典词条，再读取原文轮次。
-- 只有需要精确证据时才读取 raw turn。
-- 保持 active context 在指定预算内。
-- 不要把 LQCC 当成普通总结器；它是可查询上下文字典。
+## 本地 daemon
+
+如果用户说 daemon 正在运行，优先使用 HTTP 接口：
+
+```text
+POST /resume
+POST /search
+POST /get
+POST /append
+```
+
+## 原则
+
+只检索当前任务需要的内容。

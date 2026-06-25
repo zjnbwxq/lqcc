@@ -1,33 +1,43 @@
 # Changelog
 
-## 0.7.0
+## 0.7.1
 
-First GitHub-ready CLI release candidate.
+Usability and automation release.
 
 Added:
 
-```text
-import-chat for JSON, JSONL, Markdown, and loose text transcripts
-no-SQL packed capsule runtime format
-cross-platform Python CLI
-clean documentation and roadmap
-```
+- `lqcc quick` one-command beginner flow
+- `lqcc menu` interactive terminal menu
+- `lqcc start` guided launcher
+- `lqcc daemon` local HTTP API
+- `lqcc proxy` OpenAI-compatible non-streaming capture proxy
+- `lqcc wrap` command-output recorder
+- daemon endpoints: `/append`, `/append-many`, `/resume`, `/search`, `/get`, `/attach`
+- proxy context modes: `pass`, `resume`, `auto`
+- updated English and Chinese documentation
+- reader skill updates for automated retrieval and local writing
 
-Retained:
+Kept:
 
-```text
-create / append / search / resume / attach / export / verify
-local-only operation
-```
+- package version remains `0.7.1`
+- no-SQL packed `.capsule` backend
+- local-first operation
+- no API key required for core CLI
 
-## 0.6.0
+Known limitations:
 
-No-SQL packed capsule prototype.
+- proxy is non-streaming only
+- no browser extension yet
+- `.capsule` format is not stable until 1.0
 
-## 0.5.0
+## 0.7.0
 
-Compact raw block storage and basic attachment sidecars.
+Initial public CLI release.
 
-## 0.4.0
+Added:
 
-SQLite-backed prototype and current-conversation benchmark.
+- no-SQL packed `.capsule` file
+- `build`, `create`, `append`, `import-chat`, `import-jsonl`
+- `search`, `resume`, `get`, `attach`, `export`, `verify`, `compact`
+- basic multimodal sidecars
+- reader skill

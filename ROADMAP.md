@@ -1,64 +1,85 @@
-# Roadmap
+# LQCC Roadmap
 
-LQCC follows one rule: useful product first, research paper after the system works.
+Current public version: **0.7.1**.
 
-## v0.7 — First GitHub Release
+The goal is simple: keep long-running AI work continuous without making every new request carry the full historical context.
 
-Status: current target.
+## 0.7.1: usable CLI + automation foundation
 
-Goals:
+Status: implemented.
 
-```text
-Python CLI complete
-no-SQL packed .capsule format
-import JSONL / JSON / Markdown / text
-search / resume / append / attach / export / verify
-clean README and docs
-basic tests
-```
+- no-SQL packed `.capsule` format
+- one-command `quick` flow
+- terminal `menu`
+- local `daemon`
+- OpenAI-compatible non-streaming `proxy`
+- command `wrap`
+- search, resume, get, attach, export, verify
+- reader skill for agent tools
+- Linux / Windows / macOS Python CLI
 
-Not included:
+## 0.7.x: hardening
 
-```text
-browser extension
-GUI app
-cloud sync
-API dependency
-```
+Planned:
 
-## v0.8 — Installable User Build
+- improve Windows path handling
+- better error messages
+- more tests for daemon and proxy
+- more robust JSON / Markdown chat import
+- better duplicate detection across imported chats
+- stricter capsule verification
+- cleaner release workflow for GitHub and TestPyPI
 
-Goals:
+## 0.8: standalone executables
 
-```text
-publish Python package
-prebuilt executables for Windows / Linux / macOS
-GitHub Actions release workflow
-better sample capsules
-```
+Goal: users should not need Python.
 
-The normal user should not need to compile anything locally.
-
-## v0.9 — Stronger Context Dictionary
-
-Goals:
+Planned assets:
 
 ```text
-better DECISION / TASK / PREFERENCE extraction
-better duplicate merging
-entry version history
-stronger search ranking
-better resume packet packing
+lqcc-windows-x64.exe
+lqcc-linux-x64
+lqcc-macos-x64
+lqcc-macos-arm64
 ```
 
-Main metric:
+Also planned:
 
-```text
-same or lower token budget, better context recovery
-```
+- GitHub Actions binary builds
+- downloadable sample capsule
+- checksum files for every release
 
-## v1.0 — Stable Capsule Format
+## 0.9: stronger context dictionary
 
+Goal: fewer useless tokens and better recall of decisions.
+
+Planned:
+
+- better DECISION / TASK / PREFERENCE / WARNING extraction
+- entry versioning and conflict handling
+- better budget packing
+- better multilingual handling
+- better attachment sidecars
+- query-specific evidence retrieval
+
+## 1.0: stable local-first context layer
+
+Goal: stable public format and stable automation workflow.
+
+Planned guarantees:
+
+- stable `.capsule` format version
+- stable CLI commands
+- stable local daemon API
+- stable reader skill contract
+- stable export format
+- backward compatibility for 1.x readers
+
+## After 1.0
+
+Possible directions:
+
+<<<<<<< HEAD
 Goals:
 
 ```text
@@ -97,3 +118,12 @@ ChatGPT starter prompt
 
 The agent should call LQCC for context instead of carrying the full old conversation.
 
+=======
+- browser extension
+- local desktop UI
+- MCP server
+- richer multimodal sidecars
+- local embedding index
+- stronger compressed dictionary codec
+- public benchmark for active-context token savings
+>>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)

@@ -94,3 +94,69 @@ def test_cli_build_smoke(tmp_path: Path):
     main(["build", str(source), "-o", str(path), "--title", "CLI"])
     assert path.exists()
     main(["verify", str(path)])
+
+
+def test_cli_beginner_quick_and_defaults(tmp_path: Path, capsys):
+    from lqcc.cli import main
+    source = tmp_path / "easy.txt"
+    source.write_text(
+        "User: Decision: LQCC needs one-command beginner UX.\n"
+        "Assistant: Add lqcc quick and make resume task optional.\n",
+        encoding="utf-8",
+    )
+    capsule = tmp_path / "easy.capsule"
+    main(["quick", str(source), "-o", str(capsule), "--force", "--budget", "300"])
+    captured = capsys.readouterr().out
+    assert capsule.exists()
+    assert "Copy this into your next AI chat" in captured
+    main(["resume", str(capsule), "--budget", "250"])
+    captured = capsys.readouterr().out
+    assert "LQCC" in captured
+
+
+def test_cli_build_output_default_and_search(tmp_path: Path, capsys, monkeypatch):
+    from lqcc.cli import main
+    source = tmp_path / "default.md"
+    source.write_text("User: Requirement: output should default to source.capsule.\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    main(["build", str(source), "--force"])
+    assert (tmp_path / "default.capsule").exists()
+    main(["search", str(tmp_path / "default.capsule"), "output default"])
+    captured = capsys.readouterr().out
+    assert "output" in captured.lower()
+
+
+def test_daemon_http_endpoints(tmp_path: Path):
+    import json
+    import threading
+    import urllib.request
+    from lqcc.auto import make_daemon_server
+
+    path = tmp_path / "daemon.capsule"
+    with Capsule.create(path, title="Daemon"):
+        pass
+    server = make_daemon_server(path, port=0)
+    host, port = server.server_address[:2]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        def post(endpoint, payload):
+            req = urllib.request.Request(
+                f"http://{host}:{port}{endpoint}",
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+
+        out = post("/append", {"role": "user", "content": "Decision: daemon should write automatically."})
+        assert out["ok"] and out["turn_id"] == 1
+        out = post("/resume", {"task": "automatic writing", "budget": 300})
+        assert out["ok"] and "packet" in out
+        out = post("/search", {"query": "daemon automatically", "limit": 3})
+        assert out["ok"] and out["hits"]
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)

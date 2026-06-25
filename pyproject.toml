@@ -4,18 +4,17 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lqcc"
-version = "0.7.0"
+version = "0.7.1"
 description = "Lightweight Queryable Context Compression for token-efficient AI continuity"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
-authors = [{name = "Xiaoqi Weng"}]
+license = "MIT"
+authors = [{name = "LQCC contributors"}]
 keywords = ["llm", "context", "compression", "memory", "ai", "capsule", "cli"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX :: Linux",

@@ -1,29 +1,29 @@
 # Contributing
 
-LQCC is early-stage. Keep contributions small and testable.
+LQCC 0.7.1 is an early local-first CLI project.
 
 ## Setup
 
 ```bash
-python -m pip install -e '.[dev,multimodal]'
+git clone https://github.com/zjnbwxq/lqcc.git
+cd lqcc
+python -m pip install -e ".[dev,multimodal]"
 python -m pytest
 ```
 
-## Principles
+## What to improve first
 
-```text
-local-first
-no required API key
-small active context
-lossless archive
-clear CLI behavior
-```
+- Windows CLI behavior
+- daemon and proxy tests
+- better chat import parsers
+- better dictionary extraction
+- smaller resume packets
+- standalone executable builds
 
-## Before opening a PR
+## Rules
 
-```bash
-python -m pytest
-lqcc --help
-```
-
-Avoid adding cloud dependencies to core functionality.
+- keep the core local-first
+- do not require API keys for basic CLI use
+- do not store hidden chain-of-thought
+- preserve full visible history
+- keep active context small

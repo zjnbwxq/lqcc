@@ -1,148 +1,93 @@
-# CLI Guide
+# LQCC CLI 0.7.1
 
-LQCC is currently a local command-line tool.
+## Beginner commands
 
-## Build in one step
+```bash
+lqcc quick chat.md
+```
+
+Build a capsule and immediately print a resume packet.
+
+```bash
+lqcc
+```
+
+Open the terminal menu.
+
+## Build and import
 
 ```bash
 lqcc build chat.md -o project.capsule --title "Project"
-```
-
-This creates a new capsule and imports the transcript.
-
-## Create
-
-```bash
 lqcc create project.capsule --title "Project"
-```
-
-Options:
-
-```text
---title   human-readable title
---codec   zlib9, zlib, lzma, bz2, zstd, brotli, none
---force   overwrite an existing capsule
-```
-
-The default codec is `zlib9`, so the base CLI has no external codec dependency. Optional `zstd` and `brotli` codecs can be selected when installed.
-
-## Append
-
-```bash
-lqcc append project.capsule --role user --text "..."
-```
-
-Roles:
-
-```text
-user
-assistant
-system
-tool
-```
-
-You can also pipe text:
-
-```bash
-cat message.txt | lqcc append project.capsule --role user
-```
-
-## Import
-
-JSONL:
-
-```bash
+lqcc import-chat project.capsule chat.md
 lqcc import-jsonl project.capsule chat.jsonl
 ```
 
-Auto-detected JSON, JSONL, Markdown, or plain text:
+Supported imports:
 
-```bash
-lqcc import-chat project.capsule chat.md
+```text
+Markdown
+plain text with User:/Assistant: markers
+JSON
+JSONL role/content messages
 ```
 
-Explicit format:
+## Retrieve context
 
 ```bash
-lqcc import-chat project.capsule chat.json --format json
-lqcc import-chat project.capsule chat.txt --format text
-```
-
-## Search
-
-```bash
-lqcc search project.capsule "what was decided about SQL?"
-```
-
-JSON output:
-
-```bash
-lqcc search project.capsule "token budget" --json
-```
-
-Only dictionary entries:
-
-```bash
-lqcc search project.capsule "token budget" --entries-only
-```
-
-## Resume
-
-```bash
+lqcc search project.capsule "what did we decide?"
 lqcc resume project.capsule --task "continue the project" --budget 800
-```
-
-Write to a file:
-
-```bash
-lqcc resume project.capsule --task "write README" --budget 600 --output next_prompt.md
-```
-
-## Attach files
-
-```bash
-lqcc attach project.capsule paper.pdf
-lqcc attach project.capsule screenshot.png
-lqcc attach project.capsule notes.md
-```
-
-Inspect an attachment:
-
-```bash
+lqcc get project.capsule E1
+lqcc get project.capsule T1
 lqcc get project.capsule A1
 ```
 
-Recover bytes:
+## Write context
 
 ```bash
-lqcc extract-attachment project.capsule A1 restored.pdf
+lqcc append project.capsule --role user --text "Decision: keep active context small."
+lqcc add-entry project.capsule --kind DECISION --text "Use no-SQL packed capsules."
+lqcc attach project.capsule paper.pdf
 ```
 
-## Manual dictionary correction
+## Export and verify
 
 ```bash
-lqcc add-entry project.capsule \
-  --kind DECISION \
-  --text "LQCC should remain local-first and should not require an API key."
+lqcc export project.capsule history.md
+lqcc export project.capsule history.jsonl --format jsonl
+lqcc verify project.capsule
+lqcc compact project.capsule
+lqcc inspect project.capsule
 ```
 
-Supported kinds:
+## Automation
+
+```bash
+lqcc daemon project.capsule --port 8765
+```
+
+Run local HTTP endpoints for automatic appends and retrieval.
+
+```bash
+lqcc proxy project.capsule --upstream https://api.openai.com/v1/chat/completions --context-mode auto
+```
+
+Run an OpenAI-compatible non-streaming proxy.
+
+```bash
+lqcc wrap project.capsule -- python -m pytest
+```
+
+Run a command and record stdout/stderr.
+
+## Version
+
+```bash
+lqcc --version
+```
+
+Expected:
 
 ```text
-DECISION REQUIREMENT TASK PREFERENCE WARNING FACT TRACE ARTIFACT
-```
-
-## Export
-
-```bash
-lqcc export project.capsule full.md
-lqcc export project.capsule full.jsonl --format jsonl
-```
-
-## Inspect / compact / verify
-
-```bash
-lqcc inspect project.capsule
-lqcc compact project.capsule
-lqcc verify project.capsule
+lqcc 0.7.1
 ```

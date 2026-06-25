@@ -1,0 +1,7 @@
+{"role":"user","content":"We are building LQCC, a local-first context capsule for long-running AI conversations."}
+{"role":"assistant","content":"The core idea is to store the full visible history locally and send the model only a small task-specific working set."}
+{"role":"user","content":"Decision: .capsule must be a single portable file and should not use SQLite as the runtime format."}
+{"role":"assistant","content":"Use a no-SQL packed container with compressed raw blocks, typed dictionary entries, and a compressed tail index."}
+{"role":"user","content":"Requirement: the first public version should work as a Python CLI on Linux, Windows, and macOS."}
+{"role":"assistant","content":"The CLI should support create, append, import-jsonl, search, resume, attach, export, inspect, compact, and verify."}
+{"role":"user","content":"Warning: do not describe LQCC as a normal summarizer. It is a queryable context dictionary."}

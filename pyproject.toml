@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lqcc"
+version = "0.7.0"
+description = "Lightweight Queryable Context Compression for token-efficient AI continuity"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Xiaoqi Weng"}]
+keywords = ["llm", "context", "compression", "memory", "ai", "capsule", "cli"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Utilities",
+  "Topic :: Text Processing :: Indexing",
+]
+
+[project.optional-dependencies]
+bench = ["pytest>=8", "tiktoken>=0.7"]
+codecs = ["zstandard>=0.22", "brotli>=1.1"]
+image = ["Pillow>=10"]
+pdf = ["pypdf>=4"]
+multimodal = ["Pillow>=10", "pypdf>=4", "zstandard>=0.22", "brotli>=1.1"]
+dev = ["pytest>=8", "build>=1.2", "ruff>=0.5"]
+
+[project.scripts]
+lqcc = "lqcc.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/zjnbwxq/lqcc"
+Repository = "https://github.com/zjnbwxq/lqcc"
+Issues = "https://github.com/zjnbwxq/lqcc/issues"
+
+[tool.setuptools]
+packages = ["lqcc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

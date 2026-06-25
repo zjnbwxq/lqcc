@@ -23,6 +23,12 @@ LQCC 本地运行，不需要 API key。
 
 ## 安装
 
+测试版安装（TestPyPI）：
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple lqcc
+```
+
 源码安装：
 
 ```bash

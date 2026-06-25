@@ -97,19 +97,3 @@ ChatGPT starter prompt
 
 The agent should call LQCC for context instead of carrying the full old conversation.
 
-## Research Track
-
-Research questions:
-
-```text
-How much active model context can be avoided?
-How accurately can key decisions be recovered under a fixed budget?
-How small can the context dictionary become without losing task continuity?
-How should multimodal sidecars be compressed for AI use, not human reading?
-```
-
-Paper direction:
-
-```text
-LQCC: Lightweight Queryable Context Compression for Long-Running AI Sessions
-```

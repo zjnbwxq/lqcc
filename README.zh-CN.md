@@ -20,7 +20,6 @@ LQCC 会把完整可见历史保存在本地，从中抽取可检索的上下文
 
 ## 安装
 
-<<<<<<< HEAD
 测试版安装（TestPyPI）：
 
 ```bash
@@ -28,9 +27,8 @@ pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://
 ```
 
 源码安装：
-=======
+
 从 TestPyPI 安装：
->>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple lqcc

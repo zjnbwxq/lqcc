@@ -163,6 +163,12 @@ The skill tells an agent to use `lqcc resume` first, then `lqcc search` or `lqcc
 
 LQCC 0.7.1 handles visible text and file artifacts. It does not capture hidden chain-of-thought. It does not include a browser extension yet. Browser support, desktop UI, stronger multimodal indexing, and stable v1.0 format guarantees are future work.
 
+## My Links
+https://linux.do/u/zjnbwxq
+
 ## License
 
 MIT.
+
+
+

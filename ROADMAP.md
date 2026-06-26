@@ -79,7 +79,6 @@ Planned guarantees:
 
 Possible directions:
 
-<<<<<<< HEAD
 Goals:
 
 ```text
@@ -118,7 +117,6 @@ ChatGPT starter prompt
 
 The agent should call LQCC for context instead of carrying the full old conversation.
 
-=======
 - browser extension
 - local desktop UI
 - MCP server
@@ -126,4 +124,4 @@ The agent should call LQCC for context instead of carrying the full old conversa
 - local embedding index
 - stronger compressed dictionary codec
 - public benchmark for active-context token savings
->>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)
+

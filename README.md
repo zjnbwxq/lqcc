@@ -20,11 +20,10 @@ LQCC saves the full visible history locally, extracts a searchable context dicti
 
 ## Install
 
-<<<<<<< HEAD
 Test install via TestPyPI: 
 =======
 From TestPyPI:
->>>>>>> 5f32ab7 (Add automation layer and rewrite 0.7.1 docs)
+
 
 ```bash
 pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple lqcc
